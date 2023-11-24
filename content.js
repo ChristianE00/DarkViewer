@@ -57,10 +57,36 @@ function applyDarkModeStyles() {
             div.style.color = "#FFFFFF";
         }
     }
+    // Select all span elements
+    let spans = document.querySelectorAll('span');
+
+    // Apply white text color to each span element
+    spans.forEach(function (span) {
+        span.style.color = '#FFFFFF'; // Set color to white
+    });
+    // Select all heading elements
+    /*
+    let headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    // Apply white text color to each heading element
+    headings.forEach(function (heading) {
+        console.log('found H');
+        heading.style.color = '#FFFFFF'; // Set color to white
+    });
+*/
+    let headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
+
+    headings.forEach(function (heading) {
+        heading.style.setProperty('color', '#FFFFFF', 'important');
+    });
+
+
+
     // Modify other elements like links, buttons, etc.
     const links = document.getElementsByTagName('a');
     for (const link of links) {
-        link.style.color = "#BB86FC"; // Example: Purple color for links
+        link.style.setProperty('color', '#BB86FC', 'important');
+        //link.style.color = "#BB86FC"; // Example: Purple color for links
     }
 
     const buttons = document.getElementsByTagName('button');
@@ -71,6 +97,15 @@ function applyDarkModeStyles() {
             button.style.color = "#FFFFFF";
         }
     }
+
+    // Select all text input and textarea elements
+    let textInputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], textarea');
+
+    // Apply white text color to each element
+    textInputs.forEach(function (input) {
+        input.style.color = '#6bf0fa'; // White color
+    });
+
 
     // Add other element styles as needed
 }
@@ -105,6 +140,13 @@ function removeDarkModeStyles() {
         button.style.color = null;
     }
 
+    // Select all text input and textarea elements
+    let textInputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], textarea');
+
+    // Apply white text color to each element
+    textInputs.forEach(function (input) {
+        input.style.color = null; // White color
+    });
 
 }
 
