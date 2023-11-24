@@ -8,11 +8,20 @@
 
 
 
-console.log("Script started");
+// Revert other element styles as needed
 // Apply Dark Mode on page load if activated
-chrome.storage.local.get('darkMode', function(data) {
+chrome.storage.local.get('darkMode', function (data) {
     if (data.darkMode) {
         applyDarkModeStyles();
+    }
+});
+
+
+// Listen for the message from popup.js
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    console.log("request found");
+    if (request.command === "toggle-dark") {
+        toggleDarkMode();
     }
 });
 
@@ -22,27 +31,36 @@ chrome.storage.local.get('darkMode', function(data) {
 function toggleDarkMode() {
     const isDarkMode = document.body.classList.toggle('dark-mode-enabled');
     // Save the state in chrome.storage.local
-    chrome.storage.local.set({darkMode: isDarkMode}, function() {
+    chrome.storage.local.set({ darkMode: isDarkMode }, function () {
         console.log('Dark Mode state is set to ' + isDarkMode);
     });
     applyOrRemoveStyles(isDarkMode);
 }
 
 function applyOrRemoveStyles(isDarkMode) {
-    if (isDarkMode) {
-        applyDarkModeStyles();
-    } else {
-        removeDarkModeStyles();
-    }
+    isDarkMode ? applyDarkModeStyles() : removeDarkModeStyles();
 }
 
 
 function applyDarkModeStyles() {
     console.log("applyDarkMode");
     // Set background and text colors
-    document.body.style.backgroundColor = "#121212";
-    document.body.style.color = "#FFFFFF";
+    console.log('background: ', window.getComputedStyle(document.body).backgroundColor);
 
+    if (!isDarkColor(window.getComputedStyle(document.body).backgroundColor)) {
+        document.body.style.backgroundColor = "#121212";
+        document.body.style.color = "#FFFFFF";
+    }
+    //Modify any special divs
+    const divs = document.getElementsByTagName('div');
+    // Assume divs is a NodeList or array of div elements
+    for (const div of divs) {
+        let currentBgColor = window.getComputedStyle(div).backgroundColor;
+        if (!isDarkColor(currentBgColor)) {
+            div.style.backgroundColor = "#333333";
+            div.style.color = "#FFFFFF";
+        }
+    }
     // Modify other elements like links, buttons, etc.
     const links = document.getElementsByTagName('a');
     for (const link of links) {
@@ -51,37 +69,79 @@ function applyDarkModeStyles() {
 
     const buttons = document.getElementsByTagName('button');
     for (const button of buttons) {
-        button.style.backgroundColor = "#333333";
-        button.style.color = "#FFFFFF";
+        let currentBgColor = window.getComputedStyle(button).backgroundColor;
+        if (!isDarkColor(currentBgColor)) {
+            button.style.backgroundColor = "#333333";
+            button.style.color = "#FFFFFF";
+        }
     }
 
     // Add other element styles as needed
 }
 
 function removeDarkModeStyles() {
-    console.log("removeDarkMode");
+    /*NOTE: `backgroundColor = ""` and `backgroundColor = null` are usually treated the same between browsers, but in some
+      cases "" and null might be handled differently between browsers. 
+      
+      So, in many cases null and "" will behave similarly, using null is often considered better practice for removing inline 
+      styles because it's more explicit and clear about the intent. It also ensures more consistent behavior across different 
+      browsers and scenarios.
+    */
     // Remove styles and revert to the original state
-    document.body.style.backgroundColor = "#FFFFFF";
-    document.body.style.color = "#121212";
+    document.body.style.backgroundColor = "";
+    document.body.style.color = "";
+
+    const divs = document.getElementsByTagName('div');
+    for (const div of divs) {
+        div.style.backgroundColor = null;
+        div.style.color = null;
+    }
 
     const links = document.getElementsByTagName('a');
     for (const link of links) {
-        link.style.color = "#0000EE"; // Revert link colors
+        //link.style.color = ""; // Revert link colors
+        link.style.color = null; // Revert link colors
     }
 
     const buttons = document.getElementsByTagName('button');
     for (const button of buttons) {
-        button.style.backgroundColor = "#FFFFFF";
-        button.style.color = "#333333";
+        button.style.backgroundColor = null;
+        button.style.color = null;
     }
 
-    // Revert other element styles as needed
+
 }
 
-// Listen for the message from popup.js
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    console.log("request found");
-    if(request.command === "toggle-dark") {
-        toggleDarkMode();
+function isDarkColor(color) {
+    console.log('color', color);
+    // Convert hex color to RGB
+    function hexToRgb(hex) {
+        if (!hex) return null;
+        let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
     }
-});
+
+    let rgb;
+
+    // Check for RGB or RGBA format
+    let rgbMatch = /^rgba?\((\d+), (\d+), (\d+)/.exec(color);
+    if (rgbMatch) {
+        rgb = { r: parseInt(rgbMatch[1]), g: parseInt(rgbMatch[2]), b: parseInt(rgbMatch[3]) };
+        console.log("success");
+    } else {
+        // Convert Hex to RGB
+        console.log("fail");
+        rgb = hexToRgb(color);
+    }
+    //console.log(rgb)
+    if (!rgb) return false; // Return false if conversion failed
+    // Formula for luminance
+    let luminance = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+    return luminance < 140; // Threshold of darkness, can be adjusted
+}
