@@ -96,11 +96,6 @@ function applyStylesToElement(element) {
         element.style.setProperty('color', '#FFFFFF', 'important');
     }
 
-    // Check and apply styles for td and li tags
-    /*  if (element.tagName === 'TD' || element.tagName === 'LI') {
-          element.style.color = '#FFFFFF'; // Set text color to white
-      }
-     */
     // Check and apply styles for links
     if (element.tagName === 'A') {
         element.style.setProperty('color', '#BB86FC', 'important');
@@ -139,9 +134,7 @@ function mutationCallback(mutations) {
         console.log(document.body.classList.toggle('dark-mode-enabled'));
         if (mutation.type === 'childList' && mutation.addedNodes.length) {
             mutation.addedNodes.forEach(node => {
-                //console.log("forLoop");
                 if (node.nodeType === Node.ELEMENT_NODE) {
-                    //console.log("success");
                     applyStylesToElement(node);
                     node.querySelectorAll('*').forEach(applyStylesToElement);
                 }
