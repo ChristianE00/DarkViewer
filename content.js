@@ -1,12 +1,11 @@
 /******************************************************** */
 //Author :         Christian Ewing
 //Created On :     11/07/23
-// Last Modified : 11/23/2023 
+// Last Modified : 11/24/2023 
 // Copyright :     
 // Description :   Modifies views between dark theme and default view theme
 /******************************************************** */
 
-console.log("entered");
 /*
 * FUNCTION:  
 * Revert other element styles as needed
@@ -124,7 +123,6 @@ function mutationCallback(mutations) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     console.log("success");
                     applyStylesToElement(node);
-                    //toggleDarkMode();
                     node.querySelectorAll('*').forEach(applyStylesToElement);
                 }
             });
@@ -172,7 +170,7 @@ function applyDarkModeStyles() {
 
     // Apply styles to existing elements on the page
     document.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, input[type="text"], input[type="password"], input[type="email"], textarea').forEach(applyStylesToElement);
-    
+
     // Setup MutationObserver if not already set up
     if (!observer) {
         observer = setupMutationObserver();
