@@ -19,7 +19,6 @@ chrome.storage.local.get('darkMode', function (data) {
 
 // Listen for the message from popup.js
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    console.log("request found");
     if (request.command === "toggle-dark") {
         toggleDarkMode();
     }
@@ -32,7 +31,7 @@ function toggleDarkMode() {
     const isDarkMode = document.body.classList.toggle('dark-mode-enabled');
     // Save the state in chrome.storage.local
     chrome.storage.local.set({ darkMode: isDarkMode }, function () {
-        console.log('Dark Mode state is set to ' + isDarkMode);
+        //console.log('Dark Mode state is set to ' + isDarkMode);
     });
     applyOrRemoveStyles(isDarkMode);
 }
@@ -43,10 +42,7 @@ function applyOrRemoveStyles(isDarkMode) {
 
 
 function applyDarkModeStyles() {
-    console.log("applyDarkMode");
     // Set background and text colors
-    console.log('background: ', window.getComputedStyle(document.body).backgroundColor);
-
     if (!isDarkColor(window.getComputedStyle(document.body).backgroundColor)) {
         document.body.style.backgroundColor = "#121212";
         document.body.style.color = "#FFFFFF";
@@ -79,17 +75,18 @@ function applyDarkModeStyles() {
     // Add other element styles as needed
 }
 
+/*NOTE: `backgroundColor = ""` and `backgroundColor = null` are usually treated the same between browsers, but in some
+  cases "" and null might be handled differently between browsers. 
+  
+  So, in many cases null and "" will behave similarly, using null is often considered better practice for removing inline 
+  styles because it's more explicit and clear about the intent. It also ensures more consistent behavior across different 
+  browsers and scenarios.
+*/
 function removeDarkModeStyles() {
-    /*NOTE: `backgroundColor = ""` and `backgroundColor = null` are usually treated the same between browsers, but in some
-      cases "" and null might be handled differently between browsers. 
-      
-      So, in many cases null and "" will behave similarly, using null is often considered better practice for removing inline 
-      styles because it's more explicit and clear about the intent. It also ensures more consistent behavior across different 
-      browsers and scenarios.
-    */
+
     // Remove styles and revert to the original state
-    document.body.style.backgroundColor = "";
-    document.body.style.color = "";
+    document.body.style.backgroundColor = null;
+    document.body.style.color = null;
 
     const divs = document.getElementsByTagName('div');
     for (const div of divs) {
@@ -99,8 +96,7 @@ function removeDarkModeStyles() {
 
     const links = document.getElementsByTagName('a');
     for (const link of links) {
-        //link.style.color = ""; // Revert link colors
-        link.style.color = null; // Revert link colors
+        link.style.color = null;
     }
 
     const buttons = document.getElementsByTagName('button');
@@ -113,7 +109,6 @@ function removeDarkModeStyles() {
 }
 
 function isDarkColor(color) {
-    console.log('color', color);
     // Convert hex color to RGB
     function hexToRgb(hex) {
         if (!hex) return null;
@@ -133,13 +128,10 @@ function isDarkColor(color) {
     let rgbMatch = /^rgba?\((\d+), (\d+), (\d+)/.exec(color);
     if (rgbMatch) {
         rgb = { r: parseInt(rgbMatch[1]), g: parseInt(rgbMatch[2]), b: parseInt(rgbMatch[3]) };
-        console.log("success");
     } else {
         // Convert Hex to RGB
-        console.log("fail");
         rgb = hexToRgb(color);
     }
-    //console.log(rgb)
     if (!rgb) return false; // Return false if conversion failed
     // Formula for luminance
     let luminance = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
