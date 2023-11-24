@@ -1,9 +1,9 @@
 /******************************************************** */
-//Author :         Christian Ewing
-//Created On :     11/07/23
-// Last Modified : 11/24/2023 
+// Author :         Christian Ewing
+// Created On :     11/07/23
+// Last Modified :  11/24/2023 
 // Copyright :     
-// Description :   Modifies views between dark theme and default view theme
+// Description :    Modifies views between dark theme and default view theme
 /******************************************************** */
 
 /*
@@ -13,9 +13,10 @@
 *
 *
 */
-
+let isDarkModeActive = false;
 chrome.storage.local.get('darkMode', function (data) {
     if (data.darkMode) {
+        isDarkModeActive = true;
         applyDarkModeStyles();
     }
 });
@@ -41,6 +42,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 *
 */
 function toggleDarkMode() {
+    isDarkModeActive = !isDarkModeActive;
     const isDarkMode = document.body.classList.toggle('dark-mode-enabled');
     // Save the state in chrome.storage.local
     chrome.storage.local.set({ darkMode: isDarkMode }, function () {
@@ -62,7 +64,15 @@ function applyOrRemoveStyles(isDarkMode) {
 
 /*
 * FUNCTION
-*
+*  NOTE: element.tagName vs element.matches
+*  
+*  element.matches: Checks if the element would be selected by the specified CSS selector string. It returns true if the 
+*       element matches the selector and false otherwise. Used when you need to check if an element matches complex selectors 
+*       or when the same function needs to handle a variety of elements selected by different criteria.
+*  
+*   element.tagName:  Returns the name of the tag for the element, in uppercase. It only provides the tag name, so it's less 
+*       flexible compared to matches(). It doesn't consider class names, IDs, or other attributes. Used when you only need 
+*       to check the type of element (e.g., DIV, SPAN) without regard to other attributes like classes or IDs.
 *
 */
 // Function to apply styles to an individual element
@@ -81,11 +91,16 @@ function applyStylesToElement(element) {
         element.style.color = '#FFFFFF'; // Set color to white
     }
 
-    // Check and apply styles for headings and paragraphs
-    if (element.matches('h1, h2, h3, h4, h5, h6, p, li, b')) {
+    // Check and apply styles for headings, paragraphs, table cells, and list items.
+    if (element.matches('h1, h2, h3, h4, h5, h6, p, li, b, td, li')) {
         element.style.setProperty('color', '#FFFFFF', 'important');
     }
 
+    // Check and apply styles for td and li tags
+    /*  if (element.tagName === 'TD' || element.tagName === 'LI') {
+          element.style.color = '#FFFFFF'; // Set text color to white
+      }
+     */
     // Check and apply styles for links
     if (element.tagName === 'A') {
         element.style.setProperty('color', '#BB86FC', 'important');
@@ -116,12 +131,17 @@ function applyStylesToElement(element) {
 *
 */
 function mutationCallback(mutations) {
+    if (!isDarkModeActive) {
+        return false
+    }
+
     for (let mutation of mutations) {
+        console.log(document.body.classList.toggle('dark-mode-enabled'));
         if (mutation.type === 'childList' && mutation.addedNodes.length) {
             mutation.addedNodes.forEach(node => {
-                console.log("forLoop");
+                //console.log("forLoop");
                 if (node.nodeType === Node.ELEMENT_NODE) {
-                    console.log("success");
+                    //console.log("success");
                     applyStylesToElement(node);
                     node.querySelectorAll('*').forEach(applyStylesToElement);
                 }
@@ -157,7 +177,7 @@ let observer;
 
 
 /*
-* FUNCTION
+* FUNCTION: 
 *
 *
 */
@@ -169,7 +189,7 @@ function applyDarkModeStyles() {
     }
 
     // Apply styles to existing elements on the page
-    document.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, input[type="text"], input[type="password"], input[type="email"], textarea').forEach(applyStylesToElement);
+    document.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, td, li, input[type="text"], input[type="password"], input[type="email"], textarea').forEach(applyStylesToElement);
 
     // Setup MutationObserver if not already set up
     if (!observer) {
@@ -179,12 +199,14 @@ function applyDarkModeStyles() {
 
 
 
-/*NOTE: `backgroundColor = ""` and `backgroundColor = null` are usually treated the same between browsers, but in some
-  cases "" and null might be handled differently between browsers. 
-  
-  So, in many cases null and "" will behave similarly, using null is often considered better practice for removing inline 
-  styles because it's more explicit and clear about the intent. It also ensures more consistent behavior across different 
-  browsers and scenarios.
+/*
+* FUNCTION: 
+* NOTE: `backgroundColor = ""` and `backgroundColor = null` are usually treated the same between browsers, but in some
+* cases "" and null might be handled differently between browsers. 
+* 
+* So, in many cases null and "" will behave similarly, using null is often considered better practice for removing inline 
+* styles because it's more explicit and clear about the intent. It also ensures a more consistent behavior across different 
+* browsers and scenarios.
 */
 function removeDarkModeStyles() {
     // Remove styles and revert to the original state
@@ -200,7 +222,7 @@ function removeDarkModeStyles() {
     const spans = document.querySelectorAll('span');
     spans.forEach(span => span.style.color = null);
 
-    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
+    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, b, td, li');
     headings.forEach(heading => heading.style.color = null);
 
     const links = document.getElementsByTagName('a');
