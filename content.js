@@ -6,10 +6,15 @@
 // Description :   Modifies views between dark theme and default view theme
 /******************************************************** */
 
+console.log("entered");
+/*
+* FUNCTION:  
+* Revert other element styles as needed
+* Apply Dark Mode on page load if activated
+*
+*
+*/
 
-
-// Revert other element styles as needed
-// Apply Dark Mode on page load if activated
 chrome.storage.local.get('darkMode', function (data) {
     if (data.darkMode) {
         applyDarkModeStyles();
@@ -17,16 +22,25 @@ chrome.storage.local.get('darkMode', function (data) {
 });
 
 
-// Listen for the message from popup.js
+/*
+* FUNCTION: Listen for the message from popup.js
+*
+*
+*/
+
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.command === "toggle-dark") {
         toggleDarkMode();
     }
 });
 
-// ... rest of the content.js script ...
 
 
+/*
+* FUNCTION
+*
+*
+*/
 function toggleDarkMode() {
     const isDarkMode = document.body.classList.toggle('dark-mode-enabled');
     // Save the state in chrome.storage.local
@@ -36,79 +50,136 @@ function toggleDarkMode() {
     applyOrRemoveStyles(isDarkMode);
 }
 
+
+/*
+* FUNCTION
+*
+*
+*/
 function applyOrRemoveStyles(isDarkMode) {
     isDarkMode ? applyDarkModeStyles() : removeDarkModeStyles();
 }
 
 
+/*
+* FUNCTION
+*
+*
+*/
+// Function to apply styles to an individual element
+function applyStylesToElement(element) {
+    // Check and apply styles for divs
+    if (element.tagName === 'DIV') {
+        let currentBgColor = window.getComputedStyle(element).backgroundColor;
+        if (!isDarkColor(currentBgColor)) {
+            element.style.backgroundColor = "#333333";
+            element.style.color = "#FFFFFF";
+        }
+    }
+
+    // Check and apply styles for spans
+    if (element.tagName === 'SPAN') {
+        element.style.color = '#FFFFFF'; // Set color to white
+    }
+
+    // Check and apply styles for headings and paragraphs
+    if (element.matches('h1, h2, h3, h4, h5, h6, p, li, b')) {
+        element.style.setProperty('color', '#FFFFFF', 'important');
+    }
+
+    // Check and apply styles for links
+    if (element.tagName === 'A') {
+        element.style.setProperty('color', '#BB86FC', 'important');
+    }
+
+    // Check and apply styles for buttons
+    if (element.tagName === 'BUTTON') {
+        let currentBgColor = window.getComputedStyle(element).backgroundColor;
+        if (!isDarkColor(currentBgColor)) {
+            element.style.backgroundColor = "#333333";
+            element.style.color = "#FFFFFF";
+        }
+    }
+
+    // Check and apply styles for text inputs and textareas
+    if (element.matches('input[type="text"], input[type="password"], input[type="email"], textarea')) {
+        element.style.color = '#6bf0fa'; // Light blue color
+    }
+
+    // Apply styles to child elements
+    //element.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, input[type="text"], input[type="password"], input[type="email"], textarea').forEach(applyStylesToElement);
+}
+
+
+/*
+* FUNCTION
+* callback
+*
+*/
+function mutationCallback(mutations) {
+    for (let mutation of mutations) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length) {
+            mutation.addedNodes.forEach(node => {
+                console.log("forLoop");
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    console.log("success");
+                    applyStylesToElement(node);
+                    //toggleDarkMode();
+                    node.querySelectorAll('*').forEach(applyStylesToElement);
+                }
+            });
+        }
+    }
+}
+
+
+/*
+* FUNCTION
+* Set up and start the MutationObserver
+*
+*/
+function setupMutationObserver() {
+    const observer = new MutationObserver(mutationCallback);
+    const config = { childList: true, subtree: true };
+
+    // Targeting the 'botstuff' div
+    const targetContainer = document.getElementById('botstuff');
+    if (targetContainer) {
+        console.log("botstuff found");
+        observer.observe(targetContainer, config);
+    } else {
+        console.log("Target container 'botstuff' not found.");
+    }
+
+    return observer;
+}
+
+
+let observer;
+
+
+/*
+* FUNCTION
+*
+*
+*/
 function applyDarkModeStyles() {
-    // Set background and text colors
+    // Set background and text colors for the body
     if (!isDarkColor(window.getComputedStyle(document.body).backgroundColor)) {
         document.body.style.backgroundColor = "#121212";
         document.body.style.color = "#FFFFFF";
     }
-    //Modify any special divs
-    const divs = document.getElementsByTagName('div');
-    // Assume divs is a NodeList or array of div elements
-    for (const div of divs) {
-        let currentBgColor = window.getComputedStyle(div).backgroundColor;
-        if (!isDarkColor(currentBgColor)) {
-            div.style.backgroundColor = "#333333";
-            div.style.color = "#FFFFFF";
-        }
+
+    // Apply styles to existing elements on the page
+    document.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, input[type="text"], input[type="password"], input[type="email"], textarea').forEach(applyStylesToElement);
+    
+    // Setup MutationObserver if not already set up
+    if (!observer) {
+        observer = setupMutationObserver();
     }
-    // Select all span elements
-    let spans = document.querySelectorAll('span');
-
-    // Apply white text color to each span element
-    spans.forEach(function (span) {
-        span.style.color = '#FFFFFF'; // Set color to white
-    });
-    // Select all heading elements
-    /*
-    let headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-
-    // Apply white text color to each heading element
-    headings.forEach(function (heading) {
-        console.log('found H');
-        heading.style.color = '#FFFFFF'; // Set color to white
-    });
-*/
-    let headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
-
-    headings.forEach(function (heading) {
-        heading.style.setProperty('color', '#FFFFFF', 'important');
-    });
-
-
-
-    // Modify other elements like links, buttons, etc.
-    const links = document.getElementsByTagName('a');
-    for (const link of links) {
-        link.style.setProperty('color', '#BB86FC', 'important');
-        //link.style.color = "#BB86FC"; // Example: Purple color for links
-    }
-
-    const buttons = document.getElementsByTagName('button');
-    for (const button of buttons) {
-        let currentBgColor = window.getComputedStyle(button).backgroundColor;
-        if (!isDarkColor(currentBgColor)) {
-            button.style.backgroundColor = "#333333";
-            button.style.color = "#FFFFFF";
-        }
-    }
-
-    // Select all text input and textarea elements
-    let textInputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], textarea');
-
-    // Apply white text color to each element
-    textInputs.forEach(function (input) {
-        input.style.color = '#6bf0fa'; // White color
-    });
-
-
-    // Add other element styles as needed
 }
+
+
 
 /*NOTE: `backgroundColor = ""` and `backgroundColor = null` are usually treated the same between browsers, but in some
   cases "" and null might be handled differently between browsers. 
@@ -118,7 +189,6 @@ function applyDarkModeStyles() {
   browsers and scenarios.
 */
 function removeDarkModeStyles() {
-
     // Remove styles and revert to the original state
     document.body.style.backgroundColor = null;
     document.body.style.color = null;
@@ -128,6 +198,12 @@ function removeDarkModeStyles() {
         div.style.backgroundColor = null;
         div.style.color = null;
     }
+
+    const spans = document.querySelectorAll('span');
+    spans.forEach(span => span.style.color = null);
+
+    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p');
+    headings.forEach(heading => heading.style.color = null);
 
     const links = document.getElementsByTagName('a');
     for (const link of links) {
@@ -140,16 +216,21 @@ function removeDarkModeStyles() {
         button.style.color = null;
     }
 
-    // Select all text input and textarea elements
-    let textInputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], textarea');
-
-    // Apply white text color to each element
-    textInputs.forEach(function (input) {
-        input.style.color = null; // White color
-    });
+    const textInputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], textarea');
+    textInputs.forEach(input => input.style.color = null);
+    if (observer) {
+        observer.disconnect();
+        observer = null;
+    }
 
 }
 
+
+/*
+* FUNCTION
+*
+*
+*/
 function isDarkColor(color) {
     // Convert hex color to RGB
     function hexToRgb(hex) {
