@@ -1,9 +1,9 @@
 /******************************************************** */
-//Author :         Christian Ewing
-//Created On :     11/07/23
-// Last Modified : 11/23/2023 
+// Author :         Christian Ewing
+// Created On :     11/07/23
+// Last Modified :  11/23/2023 
 // Copyright :     
-// Description :   Modifies views between dark theme and default view theme
+// Description :    Modifies views between dark theme and default view theme
 /******************************************************** */
 
 

@@ -1,33 +1,48 @@
 /******************************************************** */
-//Author :         Christian Ewing
-//Created On :     11/07/23
-// Last Modified : 11/23/2023 
+// Author :         Christian Ewing
+// Created On :     11/07/23
+// Last Modified :  11/24/2023 
 // Copyright :     
-// Description :   Modifies views between dark theme and default view theme
+// Description :    Modifies views between dark theme and default view theme
 /******************************************************** */
 
-
-
-// Revert other element styles as needed
-// Apply Dark Mode on page load if activated
+/*
+* FUNCTION:  
+* Revert other element styles as needed
+* Apply Dark Mode on page load if activated
+*
+*
+*/
+let isDarkModeActive = false;
 chrome.storage.local.get('darkMode', function (data) {
     if (data.darkMode) {
+        isDarkModeActive = true;
         applyDarkModeStyles();
     }
 });
 
 
-// Listen for the message from popup.js
+/*
+* FUNCTION: Listen for the message from popup.js
+*
+*
+*/
+
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.command === "toggle-dark") {
         toggleDarkMode();
     }
 });
 
-// ... rest of the content.js script ...
 
 
+/*
+* FUNCTION
+*
+*
+*/
 function toggleDarkMode() {
+    isDarkModeActive = !isDarkModeActive;
     const isDarkMode = document.body.classList.toggle('dark-mode-enabled');
     // Save the state in chrome.storage.local
     chrome.storage.local.set({ darkMode: isDarkMode }, function () {
@@ -36,54 +51,157 @@ function toggleDarkMode() {
     applyOrRemoveStyles(isDarkMode);
 }
 
+
+/*
+* FUNCTION
+*
+*
+*/
 function applyOrRemoveStyles(isDarkMode) {
     isDarkMode ? applyDarkModeStyles() : removeDarkModeStyles();
 }
 
 
+/*
+* FUNCTION
+*  NOTE: element.tagName vs element.matches
+*  
+*  element.matches: Checks if the element would be selected by the specified CSS selector string. It returns true if the 
+*       element matches the selector and false otherwise. Used when you need to check if an element matches complex selectors 
+*       or when the same function needs to handle a variety of elements selected by different criteria.
+*  
+*   element.tagName:  Returns the name of the tag for the element, in uppercase. It only provides the tag name, so it's less 
+*       flexible compared to matches(). It doesn't consider class names, IDs, or other attributes. Used when you only need 
+*       to check the type of element (e.g., DIV, SPAN) without regard to other attributes like classes or IDs.
+*
+*/
+// Function to apply styles to an individual element
+function applyStylesToElement(element) {
+    // Check and apply styles for divs
+    if (element.tagName === 'DIV') {
+        let currentBgColor = window.getComputedStyle(element).backgroundColor;
+        if (!isDarkColor(currentBgColor)) {
+            element.style.backgroundColor = "#333333";
+            element.style.color = "#FFFFFF";
+        }
+    }
+
+    // Check and apply styles for spans
+    if (element.tagName === 'SPAN') {
+        element.style.color = '#FFFFFF'; // Set color to white
+    }
+
+    // Check and apply styles for headings, paragraphs, table cells, and list items.
+    if (element.matches('h1, h2, h3, h4, h5, h6, p, li, b, td, li')) {
+        element.style.setProperty('color', '#FFFFFF', 'important');
+    }
+
+    // Check and apply styles for links
+    if (element.tagName === 'A') {
+        element.style.setProperty('color', '#BB86FC', 'important');
+    }
+
+    // Check and apply styles for buttons
+    if (element.tagName === 'BUTTON') {
+        let currentBgColor = window.getComputedStyle(element).backgroundColor;
+        if (!isDarkColor(currentBgColor)) {
+            element.style.backgroundColor = "#333333";
+            element.style.color = "#FFFFFF";
+        }
+    }
+
+    // Check and apply styles for text inputs and textareas
+    if (element.matches('input[type="text"], input[type="password"], input[type="email"], textarea')) {
+        element.style.color = '#6bf0fa'; // Light blue color
+    }
+
+    // Apply styles to child elements
+    //element.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, input[type="text"], input[type="password"], input[type="email"], textarea').forEach(applyStylesToElement);
+}
+
+
+/*
+* FUNCTION
+* callback
+*
+*/
+function mutationCallback(mutations) {
+    if (!isDarkModeActive) {
+        return false
+    }
+
+    for (let mutation of mutations) {
+        console.log(document.body.classList.toggle('dark-mode-enabled'));
+        if (mutation.type === 'childList' && mutation.addedNodes.length) {
+            mutation.addedNodes.forEach(node => {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    applyStylesToElement(node);
+                    node.querySelectorAll('*').forEach(applyStylesToElement);
+                }
+            });
+        }
+    }
+}
+
+
+/*
+* FUNCTION
+* Set up and start the MutationObserver
+*
+*/
+function setupMutationObserver() {
+    const observer = new MutationObserver(mutationCallback);
+    const config = { childList: true, subtree: true };
+
+    // Targeting the 'botstuff' div
+    const targetContainer = document.getElementById('botstuff');
+    if (targetContainer) {
+        console.log("botstuff found");
+        observer.observe(targetContainer, config);
+    } else {
+        console.log("Target container 'botstuff' not found.");
+    }
+
+    return observer;
+}
+
+
+let observer;
+
+
+/*
+* FUNCTION: 
+*
+*
+*/
 function applyDarkModeStyles() {
-    // Set background and text colors
+    // Set background and text colors for the body
     if (!isDarkColor(window.getComputedStyle(document.body).backgroundColor)) {
         document.body.style.backgroundColor = "#121212";
         document.body.style.color = "#FFFFFF";
     }
-    //Modify any special divs
-    const divs = document.getElementsByTagName('div');
-    // Assume divs is a NodeList or array of div elements
-    for (const div of divs) {
-        let currentBgColor = window.getComputedStyle(div).backgroundColor;
-        if (!isDarkColor(currentBgColor)) {
-            div.style.backgroundColor = "#333333";
-            div.style.color = "#FFFFFF";
-        }
-    }
-    // Modify other elements like links, buttons, etc.
-    const links = document.getElementsByTagName('a');
-    for (const link of links) {
-        link.style.color = "#BB86FC"; // Example: Purple color for links
-    }
 
-    const buttons = document.getElementsByTagName('button');
-    for (const button of buttons) {
-        let currentBgColor = window.getComputedStyle(button).backgroundColor;
-        if (!isDarkColor(currentBgColor)) {
-            button.style.backgroundColor = "#333333";
-            button.style.color = "#FFFFFF";
-        }
-    }
+    // Apply styles to existing elements on the page
+    document.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, td, li, input[type="text"], input[type="password"], input[type="email"], textarea').forEach(applyStylesToElement);
 
-    // Add other element styles as needed
+    // Setup MutationObserver if not already set up
+    if (!observer) {
+        observer = setupMutationObserver();
+    }
 }
 
-/*NOTE: `backgroundColor = ""` and `backgroundColor = null` are usually treated the same between browsers, but in some
-  cases "" and null might be handled differently between browsers. 
-  
-  So, in many cases null and "" will behave similarly, using null is often considered better practice for removing inline 
-  styles because it's more explicit and clear about the intent. It also ensures more consistent behavior across different 
-  browsers and scenarios.
+
+
+/*
+* FUNCTION: 
+* NOTE: `backgroundColor = ""` and `backgroundColor = null` are usually treated the same between browsers, but in some
+* cases "" and null might be handled differently between browsers. 
+* 
+* So, in many cases null and "" will behave similarly, using null is often considered better practice for removing inline 
+* styles because it's more explicit and clear about the intent. It also ensures a more consistent behavior across different 
+* browsers and scenarios.
 */
 function removeDarkModeStyles() {
-
     // Remove styles and revert to the original state
     document.body.style.backgroundColor = null;
     document.body.style.color = null;
@@ -93,6 +211,12 @@ function removeDarkModeStyles() {
         div.style.backgroundColor = null;
         div.style.color = null;
     }
+
+    const spans = document.querySelectorAll('span');
+    spans.forEach(span => span.style.color = null);
+
+    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, b, td, li');
+    headings.forEach(heading => heading.style.color = null);
 
     const links = document.getElementsByTagName('a');
     for (const link of links) {
@@ -105,9 +229,21 @@ function removeDarkModeStyles() {
         button.style.color = null;
     }
 
+    const textInputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], textarea');
+    textInputs.forEach(input => input.style.color = null);
+    if (observer) {
+        observer.disconnect();
+        observer = null;
+    }
 
 }
 
+
+/*
+* FUNCTION
+*
+*
+*/
 function isDarkColor(color) {
     // Convert hex color to RGB
     function hexToRgb(hex) {
