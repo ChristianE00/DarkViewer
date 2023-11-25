@@ -78,6 +78,9 @@ function applyOrRemoveStyles(isDarkMode) {
 // Function to apply styles to an individual element
 function applyStylesToElement(element) {
 
+    if (element.matches('iframe')){
+        toggleInvertIframe();
+    }
     // Check and apply styles for divs
     if (element.tagName === 'DIV') {
         let currentBgColor = window.getComputedStyle(element).backgroundColor;
@@ -118,7 +121,7 @@ function applyStylesToElement(element) {
     }
 
     // Check and apply styles for text inputs and textareas
-    if (element.matches('input[type="text"], input[type="password"], input[type="email"], textarea, iframe')) {
+    if (element.matches('input[type="text"], input[type="password"], input[type="email"], textarea')) {
         element.style.color = '#6bf0fa'; // Light blue color
     }
 
@@ -182,7 +185,6 @@ let observer;
 *
 */
 function applyDarkModeStyles() {
-    toggleInvertIframe();
     // Set background and text colors for the body
     if (!isDarkColor(window.getComputedStyle(document.body).backgroundColor)) {
         document.body.style.backgroundColor = "#121212";
@@ -190,7 +192,7 @@ function applyDarkModeStyles() {
     }
 
     // Apply styles to existing elements on the page
-    document.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, td, li, input[type="text"], input[type="password"], input[type="email"], textarea, containerClass').forEach(applyStylesToElement);
+    document.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, td, li, input[type="text"], input[type="password"], input[type="email"], textarea, containerClass, iframe').forEach(applyStylesToElement);
 
     // Setup MutationObserver if not already set up
     if (!observer) {
