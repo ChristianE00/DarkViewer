@@ -182,7 +182,7 @@ let observer;
 *
 */
 function applyDarkModeStyles() {
-    addCSS();
+    toggleInvertIframe();
     // Set background and text colors for the body
     if (!isDarkColor(window.getComputedStyle(document.body).backgroundColor)) {
         document.body.style.backgroundColor = "#121212";
@@ -198,48 +198,14 @@ function applyDarkModeStyles() {
     }
 }
 
-
-function addCSS() {
-    // Create a <style> element
-    var style = document.createElement('style');
-    style.type = 'text/css';
-
-    // CSS as a string
-    var css = `
-    iframe {
-        filter: invert(100%);
-    }
-    
-    `;
-
-    // Append the CSS string to the <style> element
-    if (style.styleSheet) {
-        // This is required for IE8 and below.
-        style.styleSheet.cssText = css;
+function toggleInvertIframe() {
+    var iframe = document.querySelector('iframe'); // Adjust the selector as needed
+    if (iframe.style.filter === 'invert(100%)') {
+        iframe.style.filter = ''; // Remove the filter
     } else {
-        style.appendChild(document.createTextNode(css));
+        iframe.style.filter = 'invert(100%)'; // Apply the filter
     }
-
-    // Append the <style> element to <head>
-    document.head.appendChild(style);
-
-    // Select the iframe
-    var iframe = document.querySelector('iframe'); // Adjust the selector to be more specific if needed
-
-    // Create a container around the iframe
-    var container = document.createElement('div');
-    container.className = 'iframe-overlay-container';
-    iframe.parentNode.insertBefore(container, iframe);
-    container.appendChild(iframe);
-
-    // Create the overlay div
-    var overlay = document.createElement('div');
-    overlay.className = 'iframe-overlay';
-    container.appendChild(overlay);
-
-
 }
-
 
 
 /*
@@ -252,7 +218,9 @@ function addCSS() {
 * browsers and scenarios.
 */
 function removeDarkModeStyles() {
+    toggleInvertIframe();
     // Remove styles and revert to the original state
+    //addCSS();
     document.body.style.backgroundColor = null;
     document.body.style.color = null;
 
@@ -279,7 +247,7 @@ function removeDarkModeStyles() {
         button.style.color = null;
     }
 
-    const textInputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], textarea');
+    const textInputs = document.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], textarea, iframe');
     textInputs.forEach(input => input.style.color = null);
     if (observer) {
         observer.disconnect();
