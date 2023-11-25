@@ -77,6 +77,7 @@ function applyOrRemoveStyles(isDarkMode) {
 */
 // Function to apply styles to an individual element
 function applyStylesToElement(element) {
+
     // Check and apply styles for divs
     if (element.tagName === 'DIV') {
         let currentBgColor = window.getComputedStyle(element).backgroundColor;
@@ -89,6 +90,12 @@ function applyStylesToElement(element) {
     // Check and apply styles for spans
     if (element.tagName === 'SPAN') {
         element.style.color = '#FFFFFF'; // Set color to white
+    }
+
+    // Check and apply styles for a specific container
+    if (element.classList.contains('containerClass')) {
+        element.style.backgroundColor = "#333333"; // Example background color
+        element.style.color = "#FFFFFF"; // Example text color
     }
 
     // Check and apply styles for headings, paragraphs, table cells, and list items.
@@ -111,12 +118,12 @@ function applyStylesToElement(element) {
     }
 
     // Check and apply styles for text inputs and textareas
-    if (element.matches('input[type="text"], input[type="password"], input[type="email"], textarea')) {
+    if (element.matches('input[type="text"], input[type="password"], input[type="email"], textarea, iframe')) {
         element.style.color = '#6bf0fa'; // Light blue color
     }
 
     // Apply styles to child elements
-    //element.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, input[type="text"], input[type="password"], input[type="email"], textarea').forEach(applyStylesToElement);
+    //element.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, input[type="text"], input[type="password"], input[type="email"], textarea, .containerClass').forEach(applyStylesToElement);
 }
 
 
@@ -175,6 +182,7 @@ let observer;
 *
 */
 function applyDarkModeStyles() {
+    addCSS();
     // Set background and text colors for the body
     if (!isDarkColor(window.getComputedStyle(document.body).backgroundColor)) {
         document.body.style.backgroundColor = "#121212";
@@ -182,12 +190,54 @@ function applyDarkModeStyles() {
     }
 
     // Apply styles to existing elements on the page
-    document.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, td, li, input[type="text"], input[type="password"], input[type="email"], textarea').forEach(applyStylesToElement);
+    document.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, td, li, input[type="text"], input[type="password"], input[type="email"], textarea, containerClass').forEach(applyStylesToElement);
 
     // Setup MutationObserver if not already set up
     if (!observer) {
         observer = setupMutationObserver();
     }
+}
+
+
+function addCSS() {
+    // Create a <style> element
+    var style = document.createElement('style');
+    style.type = 'text/css';
+
+    // CSS as a string
+    var css = `
+    iframe {
+        filter: invert(100%);
+    }
+    
+    `;
+
+    // Append the CSS string to the <style> element
+    if (style.styleSheet) {
+        // This is required for IE8 and below.
+        style.styleSheet.cssText = css;
+    } else {
+        style.appendChild(document.createTextNode(css));
+    }
+
+    // Append the <style> element to <head>
+    document.head.appendChild(style);
+
+    // Select the iframe
+    var iframe = document.querySelector('iframe'); // Adjust the selector to be more specific if needed
+
+    // Create a container around the iframe
+    var container = document.createElement('div');
+    container.className = 'iframe-overlay-container';
+    iframe.parentNode.insertBefore(container, iframe);
+    container.appendChild(iframe);
+
+    // Create the overlay div
+    var overlay = document.createElement('div');
+    overlay.className = 'iframe-overlay';
+    container.appendChild(overlay);
+
+
 }
 
 
