@@ -8,9 +8,19 @@
 
 
 // This function sends a message to the active tab to toggle dark mode
-function toggleDarkMode() {
+/**function toggleDarkMode() {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         chrome.tabs.sendMessage(tabs[0].id, {command: "toggle-dark"});
+    });
+}
+**/
+
+function toggleDarkMode() {
+    var querying = chrome.tabs.query || browser.tabs.query;
+    var messaging = chrome.tabs.sendMessage || browser.tabs.sendMessage;
+
+    querying({active: true, currentWindow: true}, function(tabs) {
+        messaging(tabs[0].id, {command: "toggle-dark"});
     });
 }
 

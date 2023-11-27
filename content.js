@@ -108,7 +108,11 @@ function removeDarkModeStyles() {
         div.style.backgroundColor = null;
         div.style.color = null;
     }
-
+    const codes = document.getElementsByTagName('code');
+    for (const code of codes) {
+        code.style.backgroundColor = null;
+        code.style.color = null;
+    }
 
     const spans = document.querySelectorAll('span');
     spans.forEach(span => span.style.color = null);
@@ -161,11 +165,12 @@ function applyStylesToElement(element) {
     }
     if (element.matches('code')) {
         // console.log('entered code block');
-        element.style.color.filter = 'invert(100%)';
-        if (isWhiteOrBlack) {
-            element.style.color = '#FFFFFF'; // Example: changing to white
-        }
-        element.style.filter = 'invert(100%)';
+        //element.style.color.filter = 'invert(100%)';
+        element.style.backgroundColor = '#333333'; // grey color
+       // if (isWhiteOrBlack) {
+            element.style.color = '#f44336'; // Example: changing to white
+        //}
+        //element.style.filter = 'invert(100%)';
     }
     if (element.matches('iframe')) {
         toggleInvertIframe(element);
