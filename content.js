@@ -56,8 +56,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 *
 */
 function toggleDarkMode() {
+    console.log('isDarkModeActive: ' + isDarkModeActive);
     isDarkModeActive = !isDarkModeActive;
-    const isDarkMode = document.body.classList.toggle('dark-mode-enabled');
+    const isDarkMode = !document.body.classList.toggle('dark-mode-enabled');
     // Save the state in chrome.storage.local
     chrome.storage.local.set({ darkMode: isDarkMode }, function () {
         //console.log('Dark Mode state is set to ' + isDarkMode);
@@ -93,6 +94,7 @@ function isWhiteOrBlack(color) {
 * browsers and scenarios.
 */
 function removeDarkModeStyles() {
+    console.log('removeDarkModeStyles()')
     toggleInvertIframe();
     // Remove styles and revert to the original state
     //addCSS();
@@ -245,6 +247,7 @@ function applyStylesToElement(element) {
 *
 */
 function applyDarkModeStyles() {
+    console.log('applyDarkModeStyles()')
     // Set background and text colors for the body
     if (!isDarkColor(window.getComputedStyle(document.body).backgroundColor)) {
         document.body.style.backgroundColor = "#121212";

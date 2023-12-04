@@ -26,6 +26,11 @@ function toggleDarkMode() {
 
 // Add an event listener to your button in the popup
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded');
+
     var toggleButton = document.getElementById('toggle-dark-mode');
-    toggleButton.addEventListener('click', toggleDarkMode);
+    toggleButton.addEventListener('click', function() {
+        toggleDarkMode();
+        console.log('Toggle button clicked');
+    });
 });
