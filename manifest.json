@@ -3,7 +3,7 @@
     "name": "Dark Mode Extension",
     "version": "1.0",
     "description": "A simple dark mode for websites",
-    "permissions": ["activeTab", "storage"],
+    "permissions": ["activeTab", "storage", "<all_urls>"],
     "browser_action": {
         "default_popup": "popup.html",
         "default_icon": "icon.png"
@@ -13,5 +13,8 @@
             "matches": ["<all_urls>"],
             "js": ["content.js"]
         }
+    ],
+    "web_accessible_resources": [
+        "popup.html"
     ]
 }

@@ -5,6 +5,17 @@
 // Copyright :     
 // Description :    Modifies views between dark theme and default view theme
 /******************************************************** */
+let isDarkModeActive = false;
+// This function sends a message to the active tab to toggle dark mode for testing
+window.testToggleDarkMode = function testToggleDarkMode(){
+    toggleDarkMode();
+}
+
+function testToggleDarkMode(){
+    if(!isDarkModeActive){
+        toggleDarkMode();
+    }
+}
 
 /*
 * FUNCTION:  
@@ -13,13 +24,14 @@
 *
 *
 */
-let isDarkModeActive = false;
 chrome.storage.local.get('darkMode', function (data) {
     if (data.darkMode) {
         isDarkModeActive = true;
         applyDarkModeStyles();
     }
 });
+
+
 
 
 /*
@@ -33,6 +45,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         toggleDarkMode();
     }
 });
+
+
 
 
 
