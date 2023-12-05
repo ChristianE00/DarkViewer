@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Dark Mode Extension",
-    "version": "1.0",
+    "version": "1.1",
     "description": "A simple dark mode for websites",
     "permissions": ["activeTab", "storage", "<all_urls>"],
     "browser_action": {
