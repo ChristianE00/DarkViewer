@@ -78,6 +78,7 @@ function applyOrRemoveStyles(isDarkMode) {
 
 function isWhiteOrBlack(color) {
     // Checking if the color is white or black
+    //var white = 'rgb(255, 255, 255)';
     var black = 'rgb(0, 0, 0)';
     return color === white || color === black;
 }
@@ -93,6 +94,24 @@ function isWhiteOrBlack(color) {
 * browsers and scenarios.
 */
 function removeDarkModeStyles() {
+    console.log('removeDarkModeStyles()')
+    /*
+    document.querySelectorAll('*').forEach(el => {
+        if (el.tagName != 'IMG' || el.tagName === 'VIDEO' || el.querySelector('video')) {
+            if (isLightColor(window.getComputedStyle(el).backgroundColor)) {
+                console.log('found light element')
+                el.style.filter = 'invert(1)';
+            }
+            else {
+                console.log('found dark element')
+            }
+            if (isLightColor(!window.getComputedStyle(el).color)) {
+                console.log('found light text')
+                el.style.color = 'rgb(145, 93, 93)'; // Change to desired dark color
+            }
+        }
+    });
+    */
     toggleInvertIframe();
     // Remove styles and revert to the original state
     document.body.style.backgroundColor = null;
@@ -169,6 +188,7 @@ function removeDarkModeStyles() {
 *       to check the type of element (e.g., DIV, SPAN) without regard to other attributes like classes or IDs.
 *
 */
+// Function to apply styles to an individual element
 function applyStylesToElement(element) {
     if (element.matches('pre')) {
         console.log('entered code block');
