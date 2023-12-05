@@ -7,12 +7,12 @@
 /******************************************************** */
 let isDarkModeActive = false;
 // This function sends a message to the active tab to toggle dark mode for testing
-window.testToggleDarkMode = function testToggleDarkMode(){
+window.testToggleDarkMode = function testToggleDarkMode() {
     toggleDarkMode();
 }
 
-function testToggleDarkMode(){
-    if(!isDarkModeActive){
+function testToggleDarkMode() {
+    if (!isDarkModeActive) {
         toggleDarkMode();
     }
 }
@@ -95,6 +95,23 @@ function isWhiteOrBlack(color) {
 */
 function removeDarkModeStyles() {
     console.log('removeDarkModeStyles()')
+    /*
+    document.querySelectorAll('*').forEach(el => {
+        if (el.tagName != 'IMG' || el.tagName === 'VIDEO' || el.querySelector('video')) {
+            if (isLightColor(window.getComputedStyle(el).backgroundColor)) {
+                console.log('found light element')
+                el.style.filter = 'invert(1)';
+            }
+            else {
+                console.log('found dark element')
+            }
+            if (isLightColor(!window.getComputedStyle(el).color)) {
+                console.log('found light text')
+                el.style.color = 'rgb(145, 93, 93)'; // Change to desired dark color
+            }
+        }
+    });
+    */
     toggleInvertIframe();
     // Remove styles and revert to the original state
     //addCSS();
@@ -179,50 +196,40 @@ function applyStylesToElement(element) {
         element.style.color = '#FFFFFF'; // White text color
         element.style.backgroundColor = '#000000'; // Black background color
     }
-    if (element.matches('code')) {
-        // console.log('entered code block');
-        //element.style.color.filter = 'invert(100%)';
+    else if (element.matches('code')) {
         element.style.backgroundColor = '#333333'; // grey color
-       // if (isWhiteOrBlack) {
-            element.style.color = '#f44336'; // Example: changing to white
-        //}
-        //element.style.filter = 'invert(100%)';
+        element.style.color = '#f44336'; // Example: changing to white
     }
-    if (element.matches('iframe')) {
+    else if (element.matches('iframe')) {
         toggleInvertIframe(element);
     }
     // Check and apply styles for divs
-    if (element.tagName === 'DIV') {
-        let currentBgColor = window.getComputedStyle(element).backgroundColor;
-        if (!isDarkColor(currentBgColor)) {
-            element.style.backgroundColor = "#333333";
-            element.style.color = "#FFFFFF";
-        }
-    }
+    /*   if (element.tagName === 'DIV') {
+           let currentBgColor = window.getComputedStyle(element).backgroundColor;
+           //if (!isDarkColor(currentBgColor)) {
+           element.style.backgroundColor = "#333333";
+           element.style.color = "#FFFFFF";
+       }
+   */
 
     // Check and apply styles for spans
-    if (element.tagName === 'SPAN') {
+    else if (element.tagName === 'SPAN') {
+        //element.style.color = 'rgb(208, 110, 212)' // Set color to white
         element.style.color = '#FFFFFF'; // Set color to white
     }
 
-    // Check and apply styles for a specific container
-    /* if (element.classList.contains('containerClass')) {
-         element.style.backgroundColor = "#333333"; // Example background color
-         element.style.color = "#FFFFFF"; // Example text color
-     }
- */
     // Check and apply styles for headings, paragraphs, table cells, and list items.
-    if (element.matches('h1, h2, h3, h4, h5, h6, p, li, b, td, li')) {
+    else if (element.matches('h1, h2, h3, h4, h5, h6, p, li, b, td, li')) {
         element.style.setProperty('color', '#FFFFFF', 'important');
     }
 
     // Check and apply styles for links
-    if (element.tagName === 'A') {
+    else if (element.tagName === 'A') {
         element.style.setProperty('color', '#BB86FC', 'important');
     }
 
     // Check and apply styles for buttons
-    if (element.tagName === 'BUTTON') {
+    else if (element.tagName === 'BUTTON') {
         let currentBgColor = window.getComputedStyle(element).backgroundColor;
         if (!isDarkColor(currentBgColor)) {
             element.style.backgroundColor = "#333333";
@@ -231,12 +238,10 @@ function applyStylesToElement(element) {
     }
 
     // Check and apply styles for text inputs and textareas
-    if (element.matches('input[type="text"], input[type="password"], input[type="email"], textarea')) {
+    else if (element.matches('input[type="text"], input[type="password"], input[type="email"], textarea')) {
         element.style.color = '#6bf0fa'; // Light blue color
     }
 
-    // Apply styles to child elements
-    //element.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, input[type="text"], input[type="password"], input[type="email"], textarea, .containerClass').forEach(applyStylesToElement);
 }
 
 
@@ -253,9 +258,26 @@ function applyDarkModeStyles() {
         document.body.style.backgroundColor = "#121212";
         document.body.style.color = "#FFFFFF";
     }
-
+    // Apply filter to all elements
+    /*
+    document.querySelectorAll('*').forEach(el => {
+        if (el.tagName != 'IMG' || el.tagName === 'VIDEO' || el.querySelector('video')) {
+            if (isLightColor(window.getComputedStyle(el).backgroundColor)) {
+                console.log('found light element')
+                el.style.filter = 'invert(1)';
+            }
+            else {
+                console.log('found dark element')
+            }
+            if (isLightColor(!window.getComputedStyle(el).color)) {
+                console.log('found light text')
+                el.style.color = 'rgb(145, 93, 93)'; // Change to desired dark color
+            }
+        }
+    });
+    */
     // Apply styles to existing elements on the page
-    document.querySelectorAll('div, span, h1, h2, h3, h4, h5, h6, p, a, button, td, li, input[type="text"], input[type="password"], input[type="email"], textarea, containerClass, iframe, code, pre').forEach(applyStylesToElement);
+    document.querySelectorAll('span, h1, h2, h3, h4, h5, h6, p, a, button, td, li, input[type="text"], input[type="password"], input[type="email"], textarea, containerClass, iframe, code, pre, .flex--item, title').forEach(applyStylesToElement);
 
     // Setup MutationObserver if not already set up
     if (!observer) {
@@ -263,7 +285,18 @@ function applyDarkModeStyles() {
     }
 }
 
+// Function to check if a color is light
+function isLightColor(color) {
+    // Convert color to RGB
+    var rgb = window.getComputedStyle(document.body).backgroundColor.match(/\d+/g);
+    var r = parseInt(rgb[0]);
+    var g = parseInt(rgb[1]);
+    var b = parseInt(rgb[2]);
 
+    // Calculate brightness according to W3C formula
+    var brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128; // Adjust this value as needed
+}
 
 
 
@@ -330,10 +363,6 @@ function toggleInvertIframe(iframe) {
         }
     }
 }
-
-
-
-
 
 /*
 * FUNCTION
